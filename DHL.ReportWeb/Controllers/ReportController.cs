@@ -46,5 +46,32 @@ namespace ApexflowERP.ReportWeb.Controllers
 
             return result;
         }
+
+        [HttpGet]
+        [Route("PrintSVATInvoiceDocuments")]
+        public HttpResponseMessage PrintSVATInvoiceDocuments([FromUri] string InitialCatalog, int invoiceId, string reportName, string currentUser)
+        {
+            var service = new CrystalReportService();
+            var parameters = new Dictionary<string, object>
+            {
+                { "InvoiceId", invoiceId },
+                { "CurrentUser", currentUser }
+            };
+
+            string filePath = service.GenerateReport(reportName, parameters, InitialCatalog);
+
+            var result = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(File.ReadAllBytes(filePath))
+            };
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/pdf");
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("inline")
+            {
+                FileName = Path.GetFileName(filePath)
+            };
+
+            return result;
+        }
+
     }
 }
